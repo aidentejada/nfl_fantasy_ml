@@ -1,8 +1,8 @@
 import pandas as pd
 # shoutout claude for assistance
 # for reference - ecr is Expert Consensus Rankings - so less interpreting needed compared to ADP
-skill = pd.read_csv('data/features.csv')
-rankings = pd.read_csv('data/raw_rankings.csv')
+skill = pd.read_csv('../data/features.csv')
+rankings = pd.read_csv('../data/raw_rankings.csv')
 
 # standardize names so we can merge
 skill['player_display_name'] = skill['player_display_name'].str.strip().str.lower()

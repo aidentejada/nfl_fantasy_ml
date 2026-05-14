@@ -1,8 +1,8 @@
 import pandas as pd
 
 # load from the raw data csv file (pulled from 01_pull_data)
-weekly = pd.read_csv('data/raw_weekly.csv')
-snaps = pd.read_csv('data/raw_snaps.csv')
+weekly = pd.read_csv('../data/raw_weekly.csv')
+snaps = pd.read_csv('../data/raw_snaps.csv')
 # make all names match eachother since they are different across data files
 weekly['player_display_name'] = weekly['player_display_name'].str.strip().str.lower()
 snaps['player'] = snaps['player'].str.strip().str.lower()
