@@ -1,8 +1,9 @@
 import pandas as pd
 # shoutout claude for assistance
 # for reference - ecr is Expert Consensus Rankings - so less interpreting needed compared to ADP
-skill = pd.read_csv('data/features.csv')
-rankings = pd.read_csv('data/raw_rankings.csv')
+skill = pd.read_csv('data_local/features.csv')
+
+rankings = pd.read_csv('data_local/raw_rankings_2025.csv')
 
 # standardize names so we can merge
 skill['player_display_name'] = skill['player_display_name'].str.strip().str.lower()
@@ -38,7 +39,7 @@ skill['next_week_points'] = (
 # determine points jump from week to week
 skill['points_jump'] = skill['next_week_points'] - skill['fantasy_points_ppr']
 
-# Rolling average of points over last 3 weeks (this is a consistency check like are they actually consistent in performance)
+# rolling average of points over last 3 weeks (this is a consistency check like are they actually consistent in performance)
 skill['rolling_points'] = (
     skill.groupby('player_id')['fantasy_points_ppr']
     .transform(lambda x: x.rolling(3, min_periods=2).mean())
@@ -79,10 +80,10 @@ skill['is_sleeper'] = (skill['sleeper_score'] >= 4).astype(int)
 skill = skill.dropna(subset=['next_week_points'])
 
 # save before display
-skill.to_csv('data/final_dataset.csv', index=False)
-print("\n The final dataset should be handed over to our ML for better interpretation")
+skill.to_csv('data_local/final_dataset.csv', index=False)
+print("\n to aiden's master slave we go!")
 
-# Sanity check
+# sanity check
 points_threshold = skill['points_jump'].quantile(0.80)
 print(f"Total players labeled: {len(skill)}")
 print(f"Sleepers (1): {skill['is_sleeper'].sum()}")
@@ -90,8 +91,44 @@ print(f"Non-sleepers (0): {(skill['is_sleeper'] == 0).sum()}")
 print(f"Sleeper threshold was: {points_threshold:.2f} fantasy points jump")
 print(f"Players removed by ECR filter: {len(skill[skill['ecr'] <= 20])}")
 
-# this is all based on  the data (ts was good for debugging and allows me to see everything)
-sleepers = skill[skill['is_sleeper'] == 1].copy()
+
+
+
+train = skill[skill['season'] <= 2024].copy()
+test = skill[skill['season'] == 2025].copy()
+
+# NOTE FOR AIDEN: ECR column is NaN for 2020-2024 since rankings are
+# current season only. ECR filter is applied to 2025 test data only.
+
+test = test[(test['ecr'] > 20) | (test['ecr'].isna())]
+test = test[(test['ecr'] <= 150) | (test['ecr'].isna())]
+
+
+
+# Reorder columns so next_week_points is last as Aiden requested
+# First grab all columns except the ones we want at the end
+front_cols = [col for col in train.columns
+              if col not in ['is_sleeper', 'next_week_points']]
+
+# Build final column order
+final_cols = front_cols + ['is_sleeper', 'next_week_points']
+
+train = train[final_cols]
+test = test[final_cols]
+
+# Save separately
+train.to_csv('data_local/final_dataset_train.csv', index=False)
+test.to_csv('data_local/final_dataset_test.csv', index=False)
+
+print(f"Training set saved: {len(train)} rows ({train['season'].min()}-{train['season'].max()})")
+print(f"Test set saved: {len(test)} rows (2025 only)")
+print(f"Total features: {len(final_cols)} columns")
+print(f"Training sleepers: {train['is_sleeper'].sum()}")
+print(f"Test sleepers: {test['is_sleeper'].sum()}")
+
+
+# this is all based on  the data_local (ts was good for debugging and allows me to see everything and determine if it makes sense)
+sleepers = test[test['is_sleeper'] == 1].copy()
 sleepers = sleepers.sort_values('points_jump', ascending=False)
 
 print("\n🏈 TOP 10 SLEEPERS OVERALL:")
@@ -142,7 +179,7 @@ dictionary = pd.DataFrame([
 
     # Engineered features (created in 03_feature_engineering.py)
     {'column': 'target_share',          'description': 'Targets as % of total team targets that week'},
-    {'column': 'snap_share',            'description': 'Snap % directly from snaps data (offense_pct)'},
+    {'column': 'snap_share',            'description': 'Snap % directly from snaps data_local (offense_pct)'},
     {'column': 'air_yards_share',       'description': 'Air yards as % of total team air yards that week'},
     {'column': 'rolling_target_share',  'description': '4 week rolling average of target share'},
     {'column': 'rolling_snap_share',    'description': '4 week rolling average of snap share'},
@@ -171,5 +208,4 @@ dictionary = pd.DataFrame([
     {'column': 'ecr',                   'description': 'Expert Consensus Ranking (redraft overall) — lower is more valuable. Filtered to ECR 21-150 only'},
 ])
 
-dictionary.to_csv('data/data_dictionary.csv', index=False)
-print("Data dictionary saved!")
+dictionary.to_csv('data_local/data_dictionary.csv', index=False)
