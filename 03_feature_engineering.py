@@ -1,6 +1,6 @@
 import pandas as pd
 
-skill = pd.read_csv('data_local/clean_weekly.csv')
+skill = pd.read_csv('data/clean_weekly.csv')
 
 # sort so rolling calculations go in the right direction
 skill = skill.sort_values(['player_id', 'season', 'week'])
@@ -37,6 +37,6 @@ skill['rolling_air_yards_share'] = (
     .transform(lambda x: x.rolling(4, min_periods=1).mean())
 )
 
-skill.to_csv('data_local/features.csv', index=False)
+skill.to_csv('data/features.csv', index=False)
 print("Features saved!")
 print(skill.shape)

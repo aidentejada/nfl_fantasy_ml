@@ -1,9 +1,9 @@
 import pandas as pd
 # shoutout claude for assistance
 # for reference - ecr is Expert Consensus Rankings - so less interpreting needed compared to ADP
-skill = pd.read_csv('data_local/features.csv')
+skill = pd.read_csv('data/features.csv')
 
-rankings = pd.read_csv('data_local/raw_rankings_2025.csv')
+rankings = pd.read_csv('data/raw_rankings_2025.csv')
 
 # standardize names so we can merge
 skill['player_display_name'] = skill['player_display_name'].str.strip().str.lower()
@@ -80,7 +80,7 @@ skill['is_sleeper'] = (skill['sleeper_score'] >= 4).astype(int)
 skill = skill.dropna(subset=['next_week_points'])
 
 # save before display
-skill.to_csv('data_local/final_dataset.csv', index=False)
+skill.to_csv('data/final_dataset.csv', index=False)
 print("\n to aiden's master slave we go!")
 
 # sanity check
@@ -117,8 +117,8 @@ train = train[final_cols]
 test = test[final_cols]
 
 # Save separately
-train.to_csv('data_local/final_dataset_train.csv', index=False)
-test.to_csv('data_local/final_dataset_test.csv', index=False)
+train.to_csv('data/final_dataset_train.csv', index=False)
+test.to_csv('data/final_dataset_test.csv', index=False)
 
 print(f"Training set saved: {len(train)} rows ({train['season'].min()}-{train['season'].max()})")
 print(f"Test set saved: {len(test)} rows (2025 only)")
@@ -208,4 +208,4 @@ dictionary = pd.DataFrame([
     {'column': 'ecr',                   'description': 'Expert Consensus Ranking (redraft overall) — lower is more valuable. Filtered to ECR 21-150 only'},
 ])
 
-dictionary.to_csv('data_local/data_dictionary.csv', index=False)
+dictionary.to_csv('data/data_dictionary.csv', index=False)

@@ -13,7 +13,7 @@ air_yards,Total air yards on targets that week
 offense_snaps,Raw number of offensive snaps played
 offense_pct,Percentage of team offensive snaps played
 target_share,Targets as % of total team targets that week
-snap_share,Snap % directly from snaps data (offense_pct)
+snap_share,Snap % directly from snaps data_local (offense_pct)
 air_yards_share,Air yards as % of total team air yards that week
 rolling_target_share,4 week rolling average of target share
 rolling_snap_share,4 week rolling average of snap share
