@@ -1,6 +1,6 @@
 import pandas as pd
 
-skill = pd.read_csv('data/clean_weekly.csv')
+skill = pd.read_csv('../data/clean_weekly.csv')
 
 # sort so rolling calculations go in the right direction
 skill = skill.sort_values(['player_id', 'season', 'week'])
